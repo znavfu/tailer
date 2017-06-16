@@ -4,10 +4,8 @@ trap clear_up SIGINT
 
 # destructor
 clear_up () {
-	CMD=`ps -ef | grep "tail" | grep -v "grep" | awk '{print $2}'`
+	CMD=`ps -ef | grep "tail -f $FILE_PATTERN" | grep -v "grep" | awk '{print $2}'`
 	[[ ! -z $CMD ]] && kill $CMD
-	echo $PID
-	kill $PID
 	exit 0
 }
 
