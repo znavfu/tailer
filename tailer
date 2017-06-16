@@ -1,0 +1,42 @@
+#!/bin/bash
+
+trap clear_up SIGINT
+
+# destructor
+clear_up () {
+	CMD=`ps -ef | grep "tail" | grep -v "grep" | awk '{print $2}'`
+	[[ ! -z $CMD ]] && kill $CMD
+	echo $PID
+	kill $PID
+	exit 0
+}
+
+# common substring of files to follow
+FILE_PATTERN=$1
+[[ -z $FILE_PATTERN ]] && echo "File pattern not specified." && exit 1
+
+OLD_FILE_NAME="~~"
+
+while true; do
+
+	# get latest modified file that matches pattern
+	FILE_NAME=`ls -t | grep "$FILE_PATTERN" | head -1`
+	TAIL_COMMAND="tail -f $FILE_NAME"
+
+	# if latest file has changed, switch tailing
+	if [ "$FILE_NAME" == "$OLD_FILE_NAME" ]
+	then
+		:
+	else
+		#echo "Following $FILE_NAME"
+		OLD_FILE_NAME=$FILE_NAME
+
+		# kill old process
+		[[ ! -z "$PID" ]] && kill $PID > /dev/null
+
+		# start tailing and save pid of spawned process
+		$TAIL_COMMAND & PID=$!
+	fi
+
+	sleep 1
+done 2> /dev/null
