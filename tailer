@@ -1,5 +1,5 @@
 #!/bin/bash
-
+#commend
 trap clear_up SIGINT
 
 # destructor
